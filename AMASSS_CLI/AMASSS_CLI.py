@@ -234,8 +234,9 @@ def main(args):
 
     tmp = args["temp_fold"]
     base_output = args["output_folder"]
+    
+    shutil.rmtree(tmp, ignore_errors=True)
     os.makedirs(tmp, exist_ok=True)
-
     print("Temporary folder and output setup complete.", flush=True)
 
     input_path = args["inputVolume"]

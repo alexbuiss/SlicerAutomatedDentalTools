@@ -46,6 +46,7 @@ add_subdirectory(BATCHDENTALSEG)
 add_subdirectory(DOCShapeAXI)
 add_subdirectory(DOCShapeAXI_CLI)
 add_subdirectory(CLIC)
+add_subdirectory(Medical_Data_Anonymizer_Module)
 ## NEXT_MODULE
 
 #-----------------------------------------------------------------------------
