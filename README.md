@@ -39,6 +39,7 @@ Slicer automated dental tools is an extension that allows users to perform autom
 | [AutoCrop3D](#autocrop3d-module) | Automatically crop a folder of CBCT scans with the same region of interest. |
 | [AutoMatrix](#automatrix-module)| Automatically apply one or different matrix to a folder of IOS or CBCT scans. |
 | [MedX](#medx-module) | Summarize clinical notes and generate a comprehensive comorbidity dashboard. |
+| [Medical Data Anonymizer](#medical-data-anonymizer-module) | Automatically anonymize sensitive information in medical documents (DOCX, PDF, TXT, CSV, XML, ODT). |
 | [MRI2CBCT](#mri2cbct-module) | Contains the steps to perform the registration of MRI and CBCT scans.|
 | [FlexReg](#flex-reg) | Registration of IOS patient per patient with customizable patch creation. |
 | [DOCShapeAXI](#doc-shapeaxi) | Automatic classification of 3D Shape. DOC-ShapeAXI is an acronym for Dental Oral and Craniofacial Shape Analysis eXplainability and Interpretability. |
@@ -71,6 +72,7 @@ Additionally, the following modules are implemented as python scripted command-l
 | [AutoMatrix-CLI](Automatrix_CLI) | Apply transformation matrices to input volumes or landmarks |
 | [MedX-Dashboard](MedX_CLI/MedX_Dashboard) | CCreate a visual dashboard from structured comorbidity summaries |
 | [MedX-Summarize](MedX_CLI/MedX_Summarize) | Extract TMJ-related comorbidities from unstructured clinical notes using a fine-tuned LLM |
+| [Medical Data Anonymizer](#medical-data-anonymizer-module) | Automatically anonymized text files. |
 | [MRI2CBCT_APPROX](MRI2CBCT_CLI/MRI2CBCT_APPROX) | Perform automatic approximation of an MRI to a CBCT |
 | [MRI2CBCT_LR_CROP](MRI2CBCT_CLI/MRI2CBCT_LR_CROP) | Separate volumes into left and right halves for bilateral analysis |
 | [MRI2CBCT_ORIENT_CENTER_MRI](MRI2CBCT_CLI/MRI2CBCT_ORIENT_CENTER_MR) | Perform orientation and centering of MRI scans |
@@ -435,6 +437,82 @@ The **MedX** module provides a unified interface to extract clinical insight fro
      - `dashboard.png`: Composite image summarizing comorbidities.
      - `patient_data.csv`: Tabular summary of extracted conditions.
 
+## Medical Data Anonymizer Module
+
+<img src="Medical_Data_Anonymizer_Module/Resources/Icons/icon.png" alt="Extension Logo" width="70"/>
+
+The **Medical Data Anonymizer** module provides automated anonymization of sensitive information in medical documents using AI-powered text analysis. It helps ensure HIPAA compliance and patient privacy protection by identifying and removing or replacing personally identifiable information (PII) and protected health information (PHI) from various document formats.
+
+### Features
+
+**Supported File Formats:**
+- **PDF** documents
+- **Word documents** (.docx)
+- **Text files** (.txt)
+- **CSV files** (.csv)  
+- **XML files** (.xml)
+- **OpenDocument Text** (.odt)
+
+**Anonymization Options:**
+- **Names** (patients, doctors, healthcare providers)
+- **Phone Numbers**
+- **Email Addresses** 
+- **Dates and Times**
+- **Addresses and Locations**
+- **Social Security Numbers**
+- **Medical License Numbers**
+- **Driver's License Numbers** (optional)
+- **Credit Card Numbers** (optional)
+- **Bank Account Numbers** (optional)
+- **IP Addresses** (optional)
+- **URLs/Websites** (optional)
+
+**Anonymization Methods:**
+- **Replace with Label**: Replaces sensitive data with generic labels (e.g., `<PERSON>`, `<DATE>`)
+- **Redact**: Completely removes sensitive information
+- **Hash**: Replaces with cryptographic hashes for consistent anonymization
+- **Mask**: Replaces with asterisks or other masking characters
+
+### How does the module work?
+
+1. **Install Dependencies:**
+   - Click "Install Dependencies" to automatically install required libraries (Presidio, file processing tools)
+   - Restart 3D Slicer after installation
+
+2. **Select Input and Output:**
+   - **Input Directory**: Folder containing documents to be anonymized
+   - **Output Directory**: Folder where anonymized documents will be saved
+
+3. **Configure Anonymization:**
+   - **Choose Entity Types**: Select which types of sensitive information to anonymize
+   - **Advanced Options**:
+     - **Anonymization Method**: Choose how to handle detected sensitive data
+     - **Confidence Threshold**: Set detection sensitivity (0.0-1.0, default: 0.5)
+
+4. **Process Files:**
+   - Click "Anonymize Files" to start processing
+   - Progress bar shows real-time status
+   - Anonymized files are saved with "_anonymized" suffix
+
+### Output
+
+- **Anonymized Documents**: Each input file generates an anonymized version in the selected format
+- **File Mapping CSV**: `file_mappings.csv` tracks original and anonymized filenames with unique identifiers
+- **Processing Log**: Detailed logging of the anonymization process
+
+### Use Cases
+
+- **Research Data Preparation**: Remove PHI from clinical notes and research documents
+- **Data Sharing**: Prepare medical documents for sharing with external collaborators
+- **Compliance**: Ensure HIPAA compliance when processing medical documents
+- **Archive Management**: Create anonymized versions of medical records for long-term storage
+
+### Prerequisites
+
+- **Dependencies**: Automatically installed via the "Install Dependencies" button
+- **Language Models**: English language model is automatically downloaded
+- **Supported Systems**: Windows, macOS, Linux
+
 ## MRI2CBCT Module
 
 <img src="MRI2CBCT/Resources/Icons/MRI2CBCT.png" alt="Extension Logo" width="70"/>
@@ -761,7 +839,7 @@ The module checks and automatically installs these dependencies upon first usage
 
 # Acknowledgements
 
-Authors: Maxime Gillot (University of Michigan), Baptiste Baquero (UoM), Luc Anchling (UoM), Nathan Hutin (UoM), Enzo Tulissi (UoM), Alban Gaydamour (UoM), Jeanne Claret (UoM),Gaelle Leroux (UoM), Lucia Cevidanes (UoM), Juan Carlos Prieto (UNC), David Allemang (Kitware), Jean-Christophe Fillion-Robin (Kitware), Connor Bowley (Kitware), James Butler (Kitware).
+Authors: Maxime Gillot (University of Michigan), Baptiste Baquero (UoM), Luc Anchling (UoM), Nathan Hutin (UoM), Alexandre Buisson (UNC), Paul Dumont (UNC), Enzo Tulissi (UoM), Alban Gaydamour (UoM), Jeanne Claret (UoM),Gaelle Leroux (UoM), Lucia Cevidanes (UoM), Juan Carlos Prieto (UNC), David Allemang (Kitware), Jean-Christophe Fillion-Robin (Kitware), Connor Bowley (Kitware), James Butler (Kitware).
 
 
 Supported by NIDCR R01DE 024450, AA0F Grabber Family Teaching and Research Award and by Research Enhancement Award Activity 141 from the University of the Pacific, Arthur A. Dugoni School of Dentistry.

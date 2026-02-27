@@ -1126,8 +1126,6 @@ class AREGWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                 if self.module_name in ["CrownSegmentationcli T1", "AREG_IOS"]:
                     if "CrownSegmentationcli" in self.module_name:
                         self.run_conda_tool("seg")
-                        print("fin du 1er")
-                        print("nom du deuxieme:",self.list_Processes_Parameters[0]["Module"])
                         self.process = slicer.cli.run(
                             self.list_Processes_Parameters[0]["Process"],
                             None,
