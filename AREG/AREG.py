@@ -2393,7 +2393,7 @@ class AREGLogic(ScriptedLoadableModuleLogic):
         self.process.start()
         
     def install_shapeaxi(self):
-        self.run_conda_command(target=self.conda.condaCreateEnv, command=(self.name_env,self.python_version,["shapeaxi==1.0.10","ocnn==2.2.1"],)) #run in parallel to not block slicer
+        self.run_conda_command(target=self.conda.condaCreateEnv, command=(self.name_env,self.python_version,["ocnn==2.2.1","shapeaxi==1.0.10"],)) #run in parallel to not block slicer
         
     def check_if_pytorch3d(self):
         conda_exe = self.conda.getCondaExecutable()
@@ -2517,12 +2517,13 @@ class AREGLogic(ScriptedLoadableModuleLogic):
             command_to_execute = ["wsl", "--user", user, "--", "bash", "-c", command_execute]
             logger.debug(f"Command to execute in condaRunCommand: {command_to_execute}")
 
-            # start subprocess without blocking; capture pipes
+            # start subprocess without blocking; merge stderr into stdout to avoid
+            # deadlocking on two separately-filling pipes (see condaRunCommand docstring)
             self.subpro = subprocess.Popen(
                 command_to_execute,
                 shell=True,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
                 text=True,
                 encoding="utf-8",
                 errors="replace",
@@ -2536,12 +2537,13 @@ class AREGLogic(ScriptedLoadableModuleLogic):
                 command_execute = command_execute + " " + com
 
             logger.debug(f"Command to execute in conda run: {command_execute}")
-            # start subprocess and capture pipes
+            # start subprocess without blocking; merge stderr into stdout to avoid
+            # deadlocking on two separately-filling pipes (see condaRunCommand docstring)
             self.subpro = subprocess.Popen(
                 command_execute,
                 shell=True,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
                 text=True,
                 encoding="utf-8",
                 errors="replace",
@@ -2550,25 +2552,16 @@ class AREGLogic(ScriptedLoadableModuleLogic):
                 preexec_fn=os.setsid,
             )
 
-        # Read stdout/stderr in real time and print to Slicer python console
+        # Read the merged stdout/stderr stream in real time and print to Slicer python console.
+        # A single stream is read (instead of alternating reads on two separate pipes) because
+        # reading two pipes with sequential blocking readline() calls can deadlock: if the child
+        # fills one pipe's OS buffer while the parent is blocked reading the other pipe, both sides
+        # wait on each other forever.
         try:
             stdout = self.subpro.stdout
-            stderr = self.subpro.stderr
-
-            # Iterate until process terminates and pipes are exhausted
-            while True:
-                # Read line-by-line; non-blocking behavior is handled by readline() returning '' on EOF
-                out_line = stdout.readline() if stdout is not None else ''
-                err_line = stderr.readline() if stderr is not None else ''
-
-                if out_line:
-                    logger.info(out_line.rstrip())
-                if err_line:
-                    logger.error(err_line.rstrip())
-
-                # If process finished and no more output, break
-                if self.subpro.poll() is not None and (not out_line) and (not err_line):
-                    break
+            for line in iter(stdout.readline, '') if stdout is not None else []:
+                logger.info(line.rstrip())
+            self.subpro.wait()
 
         except Exception:
             # Fallback: block until end and then print collected output
