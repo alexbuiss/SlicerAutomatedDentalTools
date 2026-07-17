@@ -50,20 +50,38 @@ def main(args):
    
 
     if args.type=="butterfly":
-        butterflyPatch(modelNode,
-                        args.lineedit_teeth_left_top,
-                        args.lineedit_teeth_right_top,
-                        args.lineedit_teeth_left_bot,
-                        args.lineedit_teeth_right_bot,
-                        args.lineedit_ratio_left_top,
-                        args.lineedit_ratio_right_top,
-                        args.lineedit_ratio_left_bot,
-                        args.lineedit_ratio_right_bot,
-                        args.lineedit_adjust_left_top,
-                        args.lineedit_adjust_right_top,
-                        args.lineedit_adjust_left_bot,
-                        args.lineedit_adjust_right_bot,
-                        args.index_patch)
+
+        logger.info(
+                f"Teeth: LT={args.lineedit_teeth_left_top}, RT={args.lineedit_teeth_right_top}, "
+                f"LB={args.lineedit_teeth_left_bot}, RB={args.lineedit_teeth_right_bot} | "
+                f"Ratios: LT={args.lineedit_ratio_left_top}, RT={args.lineedit_ratio_right_top}, "
+                f"LB={args.lineedit_ratio_left_bot}, RB={args.lineedit_ratio_right_bot} | "
+                f"Adjust: LT={args.lineedit_adjust_left_top}, RT={args.lineedit_adjust_right_top}, "
+                f"LB={args.lineedit_adjust_left_bot}, RB={args.lineedit_adjust_right_bot} | "
+                f"Index: {args.index_patch}"
+            )
+        butterflyPatch(
+            surf=modelNode,
+            tooth_anterior_right=args.lineedit_teeth_right_top,
+            tooth_anterior_left=args.lineedit_teeth_left_top,
+            
+            tooth_posterior_right=args.lineedit_teeth_right_bot,
+            tooth_posterior_left=args.lineedit_teeth_left_bot,
+            
+            ratio_anterior_right=args.lineedit_ratio_right_top,
+            ratio_anterior_left=args.lineedit_ratio_left_top,
+            
+            ratio_posterior_left=args.lineedit_ratio_left_bot,
+            ratio_posterior_right=args.lineedit_ratio_right_bot,
+            
+            adjust_anterior_right=args.lineedit_adjust_right_top,
+            adjust_anterior_left=args.lineedit_adjust_left_top,
+            
+            adjust_posterior_right=args.lineedit_adjust_right_bot,
+            adjust_posterior_left=args.lineedit_adjust_left_bot,
+            
+            index=args.index_patch
+        )
     
     elif args.type=="curve":
         # Reading the data
