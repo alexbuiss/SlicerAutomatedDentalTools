@@ -815,8 +815,33 @@ class FlexRegLogic(ScriptedLoadableModuleLogic):
         logger.info(f"Running FlexReg_CLI with parameters: {parameters}")
 
         flybyProcess = slicer.modules.flexreg_cli
-        self.cliNode = slicer.cli.run(flybyProcess,None, parameters)  
+        self.cliNode = slicer.cli.run(flybyProcess,None, parameters)
+        self.cliNode.AddObserver(slicer.vtkMRMLCommandLineModuleNode.StatusModifiedEvent, self.onCliModified)  
         return flybyProcess
+    
+    def onCliModified(self, caller, event):
+        """Callback triggered when CLI status changes (completed, cancelled, etc.)."""
+        status = caller.GetStatus()
+
+        if status & (slicer.vtkMRMLCommandLineModuleNode.Completed | slicer.vtkMRMLCommandLineModuleNode.Cancelled):
+            logger.info("Background process finished (CLI)")
+
+            if status == slicer.vtkMRMLCommandLineModuleNode.Completed:
+                logger.info("FlexReg - COMPLETE")
+            elif status == slicer.vtkMRMLCommandLineModuleNode.Cancelled:
+                logger.info("PROCESS CANCELLED BY USER")
+
+            output_text = caller.GetOutputText()
+            if output_text:
+                logger.info("\n--- Detailed CLI Logs ---")
+                logger.info(output_text.strip())
+                logger.info("---------------------------\n")
+
+            error_text = caller.GetErrorText()
+            if error_text:
+                logger.error("\n--- CLI ERRORS ---")
+                logger.error(error_text.strip())
+                logger.error("---------------------\n")
     
     def init_conda(self):
         # check if CondaSetUp exists
@@ -1693,6 +1718,13 @@ class WidgetParameter:
                 qt.QMessageBox.warning(self.parent, 'Warning', 'The module will not work properly without the required libraries.\nPlease install them and try again.')
                 return
             
+            import numpy as np
+            from packaging.version import Version
+
+            numpy_version = Version(np.__version__)
+            if numpy_version > Version("2.0"):
+                pip_install("numpy<2.0.0")
+            
             FlexRegBootManager.booted = True
             self.label_time.setHidden(True)
         
@@ -2174,14 +2206,17 @@ class WidgetParameter:
                     index=int(self.combobox_patch.currentText)
 
                 self.logic = FlexRegLogic(str(self.lineedit.text),
+                                          
                                 int(self.lineedit_teeth_left_top.text),
                             int(self.lineedit_teeth_right_top.text),
                             int(self.lineedit_teeth_left_bot.text),
                             int(self.lineedit_teeth_right_bot.text),
+
                             float(self.lineedit_ratio_left_top.text),
                             float(self.lineedit_ratio_right_top.text),
                             float(self.lineedit_ratio_left_bot.text),
                             float(self.lineedit_ratio_right_bot.text),
+
                             float(self.lineedit_adjust_left_top.text),
                             float(self.lineedit_adjust_right_top.text),
                             float(self.lineedit_adjust_left_bot.text),

@@ -10,11 +10,7 @@ from MRI2CBCT_utils.Approx_MRI2CBCT import Approximation_MRI2CBCT
 from MRI2CBCT_utils.LR_crop import LR_CROP_MRI2CBCT
 from MRI2CBCT_utils.TMJ_crop import TMJ_CROP_MRI2CBCT
 
-from SlicerNNUNetLib import InstallLogic
-
-import time 
-
-
+import time
 
 import slicer
 from functools import partial
@@ -82,7 +78,8 @@ def install_function():
         ('SimpleITK', None),
         ('numpy', '==1.26.4'),
         ('numexpr', '==2.9.0'),
-        ('psutil', None)
+        ('psutil', None),
+        ('nnunet_version',"==2.8.0")
     ]
 
     libs_to_install = []
@@ -112,18 +109,6 @@ def install_function():
                     return False
         else:
             return False
-
-    # Version-aware nnUNet installation
-    install_logic = InstallLogic()
-    if sys.version_info >= (3, 10):
-        nnunet_version = "nnunetv2>=2.8.0"
-    else:
-        nnunet_version = "nnunetv2==2.5.2"
-
-    success = install_logic.setupPythonRequirements(nnunet_version)
-    if not success:
-        slicer.util.errorDisplay("nnUNet installation failed. Please check the logs.")
-        return False
 
     try:
         import vtk
