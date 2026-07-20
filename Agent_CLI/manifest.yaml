@@ -1,0 +1,892 @@
+scripts:
+  - name: ali_cbct
+    path: "ALI_CBCT.py"
+    description: "Automated Anatomic Landmarks Identification on CBCT scans using AI agents. Detects anatomical reference points on cone-beam CT volumes for precise dental and maxillofacial measurements and analysis."
+    tags: [cbct, landmarks, ali, segmentation, dicom, nifti, agent, ai, anatomy, dental, maxillofacial, detection]
+    priority: 10
+
+    cli_style: positional
+
+    parameters:
+      - name: input
+        type: path
+        required: true
+        description: "CBCT files (.nii/.nrrd/...) or folder containing the scans."
+
+      - name: dir_models
+        type: path
+        required: true
+        description: "Model folder used by ALI."
+
+      - name: lm_type
+        type: list
+        required: true
+        encode: comma_no_brackets
+        description: "List of landmark types to detect, separated by comma (no brackets)."
+
+      - name: output_dir
+        type: path
+        required: true
+        description: "Output folder where landmarks are saved"
+
+      - name: temp_fold
+        type: path
+        required: true
+        description: "Temporary folder for intermediary histogram/spacing"
+
+      - name: DCMInput
+        type: bool
+        default: false
+        encode: lower_str_bool
+        description: "Whether input is DICOM format (true) or not (false)"
+
+    examples:
+      - 'ali cbct on a .nii : "./ALI_CBCT.nii.gz" "models/" "1,2,3" "./out" "./tmp" false "[1,0.3]" "[1,1]" "[64,64,64]" 10'
+      - 'ali cbct on DICOM folder : "./patient01_dcm/" "models/" "LM1,LM2" "./out" "./tmp" true "[0.6,0.3]" "[1,1]" "[64,64,64]" 10'
+
+  - name: ali_ios
+    path: "ALI_IOS.py"
+    description: "Automatic Landmark Identification in Intraoral Scans (IOS). Detects dental and anatomical landmarks on 3D surface meshes from intraoral scanners for orthodontic and prosthodontic analysis."
+    tags: [ios, landmarks, ali, segmentation, surface, mesh, dental, intraoral, 3d, detection, anatomy]
+    priority: 9
+
+    cli_style: positional
+    parameters:
+      - name: input
+        type: path
+        required: true
+        description: "Input intraoral scan surface file (STL/VTK/OFF)."
+
+      - name: dir_models
+        type: path
+        required: true
+        description: "Folder containing the pre-trained landmark detection models."
+
+      - name: lm_type
+        type: list
+        required: true
+        encode: space_separated
+        description: "Types of landmarks to detect (space separated)."
+
+      - name: teeth
+        type: list
+        required: true
+        encode: space_separated
+        description: "Teeth to process (space separated)."
+
+      - name: output_dir
+        type: path
+        required: true
+        description: "Output folder for landmarks and results."
+
+      - name: log_path
+        type: path
+        required: true
+        description: "Path to log file for progress tracking."
+
+  - name: amasss_cli
+    path: "AMASSS_CLI.py"
+    description: "AMASSS - Anatomical Structures Segmentation from CBCT using deep learning. Automatic segmentation of maxilla, mandible, and other anatomical structures using nnUNet-based models trained on dental CBCT data."
+    tags: [cbct, segmentation, nnunet, anatomical, mandible, maxilla, jaw, dental, anatomy, deep-learning, ai]
+    priority: 8
+
+    cli_style: positional
+    parameters:
+      - name: inputVolume
+        type: path
+        required: true
+        description: "Folder containing CBCT scans to segment."
+
+      - name: modelDirectory
+        type: path
+        required: true
+        description: "Folder containing nnUNet model checkpoints."
+
+      - name: skullStructure
+        type: str
+        required: true
+        description: " List of the structures to segment"
+
+      - name: output_folder
+        type: path
+        required: true
+        description: "Output folder for segmented structures."
+
+      - name: temp_fold
+        type: path
+        required: true
+        description: "Path to log file."
+
+  - name: areg_cbct
+    path: "AREG_CBCT.py"
+    description: "Automatic Registration of CBCT images for longitudinal studies. Registers baseline and follow-up CBCT scans using deformable or rigid registration to track anatomical changes over time."
+    tags: [cbct, registration, voxel, transformation, dicom, longitudinal, deformable, rigid, alignment]
+    priority: 7
+
+    cli_style: positional
+    parameters:
+      - name: t1_folder
+        type: path
+        required: true
+        description: "Folder containing baseline (T1) CBCT scans."
+
+      - name: t2_folder
+        type: path
+        required: true
+        description: "Folder containing follow-up (T2) CBCT scans."
+
+      - name: reg_type
+        type: str
+        required: true
+        description: "Registration type (e.g., MAND, MAX, CB)."
+
+      - name: output_folder
+        type: path
+        required: true
+        description: "Output folder for registered images and transforms."
+
+      - name: DCMInput
+        type: bool
+        default: false
+        encode: lower_str_bool
+        description: "Whether input is DICOM format."
+
+      - name: temp_folder
+        type: path
+        required: true
+        description: "Temporary folder for intermediate files."
+
+      - name: mask_folder_t1
+        type: path
+        default: "None"
+        description: "Optional mask folder for T1 segmentation."
+
+  - name: areg_ios
+    path: "AREG_IOS.py"
+    description: "Automatic Registration of Intraoral Scans using Iterative Closest Point (ICP). Registers baseline and follow-up IOS surfaces for longitudinal dental tracking and treatment outcome assessment."
+    tags: [ios, registration, icp, surface, transformation, mesh, longitudinal, alignment, dental]
+    priority: 6
+
+    cli_style: positional
+    parameters:
+      - name: T1
+        type: path
+        required: true
+        description: "Folder containing baseline (T1) intraoral scan surfaces."
+
+      - name: T2
+        type: path
+        required: true
+        description: "Folder containing follow-up (T2) intraoral scan surfaces."
+
+      - name: output
+        type: path
+        required: true
+        description: "Output folder for registered surfaces."
+
+      - name: model
+        type: path
+        required: true
+        description: "Path to segmentation refinement model."
+
+      - name: log_path
+        type: path
+        required: true
+        description: "Log file path."
+
+      - name: areg_mode
+        type: str
+        default: "Auto_IOS"
+        description: "Registration mode (e.g., Auto_IOS)."
+
+  - name: autocrop3d
+    path: "AutoCrop3D_CLI.py"
+    description: "Automatic 3D region cropping using ROI markers. Extracts and crops regions of interest from 3D volumetric medical images (CT, MRI, CBCT) using point-based or region markers for focused analysis."
+    tags: [crop, roi, volume, marker, nifti, nrrd, cbct, mri, ct, extraction, region]
+    priority: 5
+
+    cli_style: positional
+    parameters:
+      - name: scan_files_path
+        type: path
+        required: true
+        description: "Folder containing scan files (.nii, .nrrd, etc.)."
+
+      - name: path_ROI_file
+        type: path
+        required: true
+        description: "Path to ROI marker file (.mrk.json) or folder."
+
+      - name: output_path
+        type: path
+        required: true
+        description: "Output folder for cropped volumes."
+
+      - name: box_Size
+        type: bool
+        default: true
+        encode: python_literal
+        description: "ROI box size in physical coordinates."
+
+      - name: logPath
+        type: path
+        required: true
+        description: "Progress log file path."
+
+  - name: automatrix
+    path: "Automatrix_CLI.py"
+    description: "Automatic transformation matrix application to scans and surfaces. Applies pre-computed transformation matrices (rigid, affine, or deformable) to medical images and 3D surface meshes for standardized registration."
+    tags: [transformation, matrix, deformation, registration, alignment, affine, rigid, warping]
+    priority: 4
+
+    cli_style: positional
+    parameters:
+      - name: input_patient
+        type: path
+        required: true
+        description: "Input scan or surface file/folder."
+
+      - name: input_matrix
+        type: path
+        required: true
+        description: "Folder containing transformation matrices (.tfm, .h5)."
+
+      - name: reference_file
+        type: path
+        default: "None"
+        description: "Optional reference file for transformed files. Use 'None' to keep each scan's own geometry."
+      
+      - name: fromAreg
+        type: bool
+        default: false
+        description: "bool to know if this module is lauch after areg"
+
+      - name: output_folder
+        type: path
+        required: true
+        description: "Output folder for transformed files."
+
+      - name: log_path
+        type: path
+        required: true
+        description: "Path to log file."
+
+      - name: is_seg
+        type: bool
+        default: false
+        description: "Bool to know if the input scan is a segmentation"
+
+  - name: batchdentalseg
+    path: "BATCHDENTALSEG.py"
+    description: "Batch Dental Segmentation using nnUNet in 3D Slicer. Automated segmentation of dental structures (teeth, bone, soft tissue) from CBCT scans using pre-trained nnUNet deep learning models with batch processing support."
+    tags: [dental, segmentation, nnunet, cbct, slicer, teeth, bone, deep-learning, batch, plugin]
+    priority: 3
+
+    cli_style: ui_module
+    parameters:
+      - name: input_folder
+        type: path
+        required: true
+        description: "Folder containing dental CBCT scans."
+
+      - name: output_folder
+        type: path
+        required: true
+        description: "Output folder for segmented dental structures."
+
+      - name: models_folder
+        type: path
+        required: true
+        description: "Folder containing nnUNet model weights."
+
+      - name: log_path
+        type: path
+        required: true
+        description: "Progress log file."
+
+  - name: clic
+    path: "CLIC.py"
+    description: "CLIC - Mask-RCNN CBCT segmentation (GPU/CPU) integrated in 3D Slicer. Instance segmentation of dental and anatomical structures from CBCT using Mask R-CNN with GPU acceleration support for real-time performance."
+    tags: [cbct, segmentation, mask-rcnn, slicer, gpu, deep-learning, instance-segmentation, dental, gpu-acceleration]
+    priority: 2
+
+    cli_style: ui_module
+    parameters:
+      - name: input_path
+        type: path
+        required: true
+        description: "Folder containing CBCT scans."
+
+      - name: model_folder
+        type: path
+        required: true
+        description: "Folder containing Mask-RCNN model."
+
+      - name: output_dir
+        type: path
+        required: true
+        description: "Output folder for segmentations."
+
+  - name: docshapeaxi
+    path: "DOCShapeAXI_CLI.py"
+    description: "Shape Analysis of dental surfaces using ShapeAXI. Statistical shape analysis and classification of 3D dental meshes with GradCAM visualization for interpretability and morphometric feature extraction."
+    tags: [shape, analysis, surface, gradcam, classification, mesh, 3d, morphometry, dental, interpretability]
+    priority: 1
+
+    cli_style: positional
+    parameters:
+      - name: input_dir
+        type: path
+        required: true
+        description: "Folder containing surface meshes (.vtk, .stl, .off)."
+
+      - name: output_dir
+        type: path
+        required: true
+        description: "Output folder for analysis results."
+
+      - name: data_type
+        type: str
+        required: true
+        description: "Type of input data being analyzed (e.g., mesh, surface)."
+
+      - name: task
+        type: str
+        required: true
+        description: "Shape analysis task to perform (e.g., classification, regression)."
+      
+      - name: model
+        type: str
+        required: true
+        description: "Name of the model used"
+
+      - name: nn
+        type: str
+        required: true
+        description: "Model type"
+
+      - name: num_classes
+        type: int
+        required: true
+        description: "Number of classes."
+      
+      - name: log_path
+        type: path
+        required: true
+        description: "Log file path."
+
+  - name: flexreg
+    path: "FlexReg_CLI.py"
+    description: "Flexible Patch-based Registration for dental surfaces. Registers 3D dental surface meshes using patch-based deformable registration with butterfly and curve patch methods, or rigid ICP registration, for precision tooth movement tracking."
+    tags: [registration, surface, patch, deformation, mesh, dental, 3d, deformable, alignment, tooth, icp]
+    priority: 11
+
+    cli_style: positional
+    parameters:
+      - name: lineedit
+        type: path
+        required: true
+        description: "Input surface file (.vtk) to patch or register."
+
+      - name: lineedit_teeth_left_top
+        type: int
+        default: 0
+        description: "Tooth ID for the top-left patch corner (butterfly type only)."
+
+      - name: lineedit_teeth_right_top
+        type: int
+        default: 0
+        description: "Tooth ID for the top-right patch corner (butterfly type only)."
+
+      - name: lineedit_teeth_left_bot
+        type: int
+        default: 0
+        description: "Tooth ID for the bottom-left patch corner (butterfly type only)."
+
+      - name: lineedit_teeth_right_bot
+        type: int
+        default: 0
+        description: "Tooth ID for the bottom-right patch corner (butterfly type only)."
+
+      - name: lineedit_ratio_left_top
+        type: float
+        default: 0.5
+        description: "Patch ratio for the top-left corner (butterfly type only)."
+
+      - name: lineedit_ratio_right_top
+        type: float
+        default: 0.5
+        description: "Patch ratio for the top-right corner (butterfly type only)."
+
+      - name: lineedit_ratio_left_bot
+        type: float
+        default: 0.5
+        description: "Patch ratio for the bottom-left corner (butterfly type only)."
+
+      - name: lineedit_ratio_right_bot
+        type: float
+        default: 0.5
+        description: "Patch ratio for the bottom-right corner (butterfly type only)."
+
+      - name: lineedit_adjust_left_top
+        type: float
+        default: 0.0
+        description: "Patch adjustment for the top-left corner (butterfly type only)."
+
+      - name: lineedit_adjust_right_top
+        type: float
+        default: 0.0
+        description: "Patch adjustment for the top-right corner (butterfly type only)."
+
+      - name: lineedit_adjust_left_bot
+        type: float
+        default: 0.0
+        description: "Patch adjustment for the bottom-left corner (butterfly type only)."
+
+      - name: lineedit_adjust_right_bot
+        type: float
+        default: 0.0
+        description: "Patch adjustment for the bottom-right corner (butterfly type only)."
+
+      - name: curve
+        type: str
+        default: "[]"
+        description: "Curve points as '[x y z],[x y z],...' (curve type only)."
+
+      - name: middle_point
+        type: str
+        default: "[0,0,0]"
+        description: "Middle point of the curve as '[x,y,z]' (curve type only)."
+
+      - name: type
+        type: str
+        required: true
+        description: "Operation to perform: 'butterfly', 'curve', 'delete', or 'icp'."
+
+      - name: path_reg
+        type: path
+        default: "None"
+        description: "Path to the T1 surface to register against (icp type only)."
+
+      - name: path_output
+        type: path
+        required: true
+        description: "Output folder for the patched/registered surface."
+
+      - name: suffix
+        type: str
+        default: "_Reg"
+        description: "Suffix appended to output file names."
+
+      - name: index_patch
+        type: int
+        default: 1
+        description: "Index of the patch array to write/delete (Butterfly<index>)."
+
+      - name: lower_arch
+        type: path
+        default: "None"
+        description: "Optional lower-arch surface to transform alongside the main surface (icp type only), or 'None'."
+
+  - name: medx_dashboard
+    path: "MedX_Dashboard.py"
+    description: "MedX Dashboard - Interactive visualization of medical data and analysis summaries. Generates HTML dashboards for visual exploration of clinical outcomes, measurements, and longitudinal study results."
+    tags: [dashboard, visualization, medx, summarization, html, clinical, web, reporting, analytics]
+    priority: 12
+
+    cli_style: positional
+    parameters:
+      - name: summary_folder
+        type: path
+        required: true
+        description: "Folder containing summary files."
+
+      - name: output_folder
+        type: path
+        required: true
+        description: "Output folder for dashboard HTML."
+
+  - name: medx_summarize
+    path: "MedX_Summarize.py"
+    description: "MedX Summarize - Automatic medical text summarization using transformers. Generates concise clinical summaries from patient notes (PDF, DOCX, TXT) using transformer-based NLP models for quick clinical review."
+    tags: [nlp, summarization, medx, pdf, docx, transformers, text, clinical, ai, document]
+    priority: 13
+
+    cli_style: positional
+    parameters:
+      - name: input_notes
+        type: path
+        required: true
+        description: "Folder containing patient notes (PDF/DOCX/TXT)."
+
+      - name: input_model
+        type: str
+        default: "t5-base"
+        description: "Huggingface model for summarization."
+
+      - name: output_folder
+        type: path
+        required: true
+        description: "Output folder for summaries."
+
+      - name: log_path
+        type: path
+        required: true
+        description: "Log file path."
+
+  - name: mri2cbct_approx
+    path: "MRI2CBCT_APPROX.py"
+    description: "MRI to CBCT approximation and preprocessing for multimodal registration. Preprocesses MRI and CBCT scans with intensity normalization and spatial reorientation for subsequent multimodal registration and fusion."
+    tags: [mri, cbct, registration, approximation, transformation, multimodal, preprocessing, normalization]
+    priority: 14
+
+    cli_style: positional
+    parameters:
+      - name: cbct_folder
+        type: path
+        required: true
+        description: "Folder containing CBCT scans."
+
+      - name: mri_folder
+        type: path
+        required: true
+        description: "Folder containing MRI scans."
+
+      - name: output_folder
+        type: path
+        required: true
+        description: "Output folder for approximated images."
+
+  - name: mri2cbct_reg
+    path: "MRI2CBCT_REG.py"
+    description: "MRI to CBCT image registration with intensity normalization. Registers MRI volumes to CBCT reference frames using deformable registration with automatic intensity normalization for joint imaging analysis."
+    tags: [mri, cbct, registration, normalization, segmentation, multimodal, intensity, deformable]
+    priority: 15
+
+    cli_style: positional
+    parameters:
+
+      - name: output_folder
+        type: path
+        required: true
+        description: "Output folder for registered images."
+
+      - name: mri_folder
+        type: path
+        required: true
+        description: "Folder containing MRI scans."
+
+      - name: cbct_folder
+        type: path
+        required: true
+        description: "Folder containing CBCT scans."
+
+      - name: cbct_label2
+        type: path
+        required: true
+        description: "Folder containing CBCT masks."
+
+  - name: mri2cbct_lr_crop
+    path: "MRI2CBCT_LR_CROP.py"
+    description: "Crop MRI and CBCT volumes for left-right asymmetry analysis. Extracts left and right hemimandibular or hemimaxillary regions from registered MRI-CBCT pairs for bilaterial morphometric comparison and asymmetry assessment."
+    tags: [mri, cbct, crop, left-right, asymmetry, hemimandible, morphometry, bilateral, analysis]
+    priority: 16
+
+    cli_style: positional
+    parameters:
+      - name: input_folder_CBCT
+        type: path
+        required: true
+        description: "Folder containing CBCT scans."
+
+      - name: input_folder_MRI
+        type: path
+        required: true
+        description: "Folder containing MRI scans."
+
+      - name: input_folder_Seg
+        type: path
+        required: true
+        description: "Folder containing segmentations."
+
+      - name: output_folder
+        type: path
+        required: true
+        description: "Output folder for cropped volumes."
+
+  - name: mri2cbct_orient_center
+    path: "MRI2CBCT_ORIENT_CENTER_MRI.py"
+    description: "Orient and center MRI scans for standardized positioning. Automatically reorients and centers MRI volumes to a canonical anatomical frame of reference for standardized analysis and comparison across subjects."
+    tags: [mri, orientation, centering, registration, standardization, preprocessing, alignment, anatomical]
+    priority: 17
+
+    cli_style: positional
+    parameters:
+      - name: input_folder
+        type: path
+        required: true
+        description: "Folder containing MRI scans."
+
+      - name: direction
+        type: str
+        default: "-1.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 1.0"
+        description: "New direction for the NIfTI files, specified as a comma-separated string of floats."
+
+      - name: output_folder
+        type: path
+        required: true
+        description: "Output folder for oriented scans."
+
+      - name: acquisition_z_spacing
+        type: float
+        default: 3.0
+        description: "Z-axis spacing for MRI (mm)."
+
+  - name: mri2cbct_resample
+    path: "MRI2CBCT_RESAMPLE_CBCT_MRI.py"
+    description: "Resample MRI and CBCT to uniform spacing. Interpolates medical images to isotropic or anisotropic target resolution for standardized processing and compatibility with subsequent deep learning or analysis pipelines."
+    tags: [mri, cbct, resample, spacing, interpolation, preprocessing, voxel, standardization]
+    priority: 18
+
+    cli_style: positional
+    parameters:
+      - name: input_folder_MRI
+        type: path
+        required: true
+        description: "Folder containing MRI scans to resample."
+
+      - name: input_folder_T2_MRI
+        type: path
+        required: true
+        description: "Folder containing MRI T2 scans to resample."
+
+      - name: input_folder_CBCT
+        type: path
+        required: true
+        description: "Folder containing CBCT scans to resample."
+
+      - name: input_folder_T2_CBCT
+        type: path
+        required: true
+        description: "Folder containing CBCT T2 scans to resample."
+      
+      - name: input_folder_Seg
+        type: path
+        required: true
+        description: "Folder containing Seg scans to resample."
+
+      - name: input_folder_T2_Seg
+        type: path
+        required: true
+        description: "Folder containing Seg T2 scans to resample."
+
+      - name: output_folder
+        type: path
+        required: true
+        description: "Output folder for resampled images."
+
+      - name: resample_size
+        type: list
+        default: [443,443, 119]
+        encode: comma_no_brackets
+        description: "Target resample size (x,y,z voxels), comma separated, no brackets."
+
+      - name: spacing
+        type: list
+        default: [0.3,0.3,0.3]
+        encode: comma_no_brackets
+        description: "Target spacing (x,y,z mm), comma separated, no brackets."
+
+      - name: center
+        type: bool
+        default: false
+        description: "Interpolation method: linear, nearest, etc."
+
+  - name: mri2cbct_tmj_crop
+    path: "MRI2CBCT_TMJ_CROP.py"
+    description: "Automatic Temporomandibular Joint (TMJ) region segmentation and cropping. Automatically segments and extracts TMJ regions from MRI and CBCT scans using trained nnUNet models for focused TMJ analysis and disorder assessment."
+    tags: [tmj, crop, segmentation, nnunet, cbct, mri, joint, temporomandibular, anatomy, medical]
+    priority: 19
+
+    cli_style: positional
+    parameters:
+      - name: cbct_folder
+        type: path
+        required: true
+        description: "Folder containing CBCT scans."
+
+      - name: mri_folder
+        type: path
+        required: true
+        description: "Folder containing MRI scans."
+
+      - name: seg_folder
+        type: path
+        required: true
+        description: "Folder containing segmentations scans."
+
+      - name: output_folder
+        type: path
+        required: true
+        description: "Output folder for cropped TMJ regions."
+
+      - name: model_folder
+        type: path
+        required: true
+        description: "Folder containing nnUNet TMJ segmentation model."
+
+      - name: tmp_folder
+        type: path
+        required: true
+        description: "Log file path."        
+
+  - name: pre_aso_cbct
+    path: "PRE_ASO_CBCT.py"
+    description: "Preprocessing for Automatic Segmentation Orientation - CBCT. Preprocesses CBCT scans with standardized resampling, orientation correction, and field-of-view adjustment for subsequent automated segmentation pipelines."
+    tags: [cbct, preprocessing, orientation, resampling, registration, standardization, fov, dental]
+    priority: 20
+
+    cli_style: positional
+    parameters:
+      - name: input
+        type: path
+        required: true
+        description: "Folder containing CBCT scans."
+
+      - name: output_folder
+        type: path
+        required: true
+        description: "Output folder for preprocessed scans."
+
+      - name: model_folder
+        type: path
+        required: true
+        description: "Folder of the model."
+      
+      - name: temp_folder
+        type: path
+        required: true
+        description: "Log file path."
+
+      - name: DCMInput
+        type: bool
+        default: false
+        encode: lower_str_bool
+        description: "Input is DICOM format."
+
+  - name: pre_aso_ios
+    path: "PRE_ASO_IOS.py"
+    description: "Preprocessing for Automatic Segmentation Orientation - IOS. Orients and preprocesses intraoral scan surfaces for standardized coordinate frames and tooth-specific segmentation and analysis."
+    tags: [ios, preprocessing, orientation, surface, mesh, dental, tooth, 3d, standardization]
+    priority: 21
+
+    cli_style: positional
+    parameters:
+      - name: input_folder
+        type: path
+        required: true
+        description: "Folder containing intraoral scan surfaces."
+
+      - name: gold_folder
+        type: path
+        required: true
+        description: "Folder containing intraoral scan surfaces."
+
+      - name: output_folder
+        type: path
+        required: true
+        description: "Output folder for oriented surfaces."
+
+      - name: list_teeth
+        type: list
+        required: true
+        encode: comma_separated
+        description: "List of teeth to process (comma separated)."
+
+      - name: occlusion
+        type: bool
+        required: true
+        description: "Bool to know if it is an occlusion"
+
+      - name: jaw
+        type: str
+        required: true
+        description: "'Upper' or 'Lower' whether or not the scan is a lower or upper jaw"
+
+      - name: log_path
+        type: path
+        required: true
+        description: "Log file path."
+
+  - name: semi_aso_cbct
+    path: "SEMI_ASO_CBCT.py"
+    description: "Semi-Automatic Segmentation Orientation for CBCT using landmarks. Combines manually-placed anatomical landmarks with ICP-based registration to orient and standardize CBCT scans for consistent segmentation."
+    tags: [cbct, segmentation, orientation, landmarks, icp, registration, semi-automatic, dental]
+    priority: 22
+
+    cli_style: positional
+    parameters:
+      - name: input
+        type: path
+        required: true
+        description: "Folder containing scans and landmark files."
+
+      - name: gold_folder
+        type: path
+        required: true
+        description: "Reference/gold standard scans and landmarks."
+
+      - name: output_folder
+        type: path
+        required: true
+        description: "Output folder for oriented scans."
+
+      - name: list_landmark
+        type: list
+        required: true
+        encode: space_separated
+        description: "Landmark names to use for registration."
+
+  - name: semi_aso_ios
+    path: "SEMI_ASO_IOS.py"
+    description: "Semi-Automatic Segmentation Orientation for IOS using landmarks. Uses manually-placed anatomical landmarks on dental surfaces with ICP registration to establish canonical tooth and jaw coordinate frames for analysis."
+    tags: [ios, segmentation, orientation, landmarks, icp, surface, semi-automatic, dental, mesh]
+    priority: 23
+
+    cli_style: positional
+    parameters:
+      - name: input_folder
+        type: path
+        required: true
+        description: "Folder containing surface files and landmarks."
+
+      - name: gold_folder
+        type: path
+        required: true
+        description: "Reference surface and landmark files."
+
+      - name: output_folder
+        type: path
+        required: true
+        description: "Output folder for oriented surfaces."
+
+      - name: list_landmark
+        type: list
+        required: true
+        encode: comma_separated
+        description: "Landmark names for registration."
+
+      - name: occlusion
+        type: bool
+        required: true
+        description: "Bool to know if it is an occlusion"
+
+      - name: jaw
+        type: str
+        required: true
+        description: "'Upper' or 'Lower' whether or not the scan is a lower or upper jaw"
+
+      - name: log_path
+        type: path
+        required: true
+        description: "Log file path."

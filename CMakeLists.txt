@@ -55,6 +55,8 @@ add_subdirectory(VFACE)
 add_subdirectory(VFACE_CLI)
 add_subdirectory(GreedyReg)
 add_subdirectory(GreedyReg_CLI)
+add_subdirectory(Agent)
+add_subdirectory(Agent_CLI)
 ## NEXT_MODULE
 
 #-----------------------------------------------------------------------------
