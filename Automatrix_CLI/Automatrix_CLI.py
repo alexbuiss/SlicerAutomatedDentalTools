@@ -154,7 +154,7 @@ def GetPatients(file_path:str,matrix_path:str):
 
             for i in range(len(matrixes)):
                 matrix = matrixes[i]
-                matrix_pat = os.path.basename(matrix).split('_Left')[0].split('_left')[0].split('_Right')[0].split('_right')[0].split('_Or')[0].split('_OR')[0].split('_MAND')[0].split('_MD')[0].split('_MAX')[0].split('_MX')[0].split('_CB')[0].split('_lm')[0].split('_T2')[0].split('_T1')[0].split('_Cl')[0].split('_MA')[0].split('_Mir')[0].split('_mir')[0].split('_Mirror')[0].split('_mirror')[0].split('_MR')[0].split('.')[0].replace('.','')
+                matrix_pat = os.path.basename(matrix).split('_SegOr')[0].split('_Left')[0].split('_left')[0].split('_Right')[0].split('_right')[0].split('_Or')[0].split('_OR')[0].split('_MAND')[0].split('_MD')[0].split('_MAX')[0].split('_MX')[0].split('_CB')[0].split('_lm')[0].split('_T2')[0].split('_T1')[0].split('_Cl')[0].split('_MA')[0].split('_Mir')[0].split('_mir')[0].split('_Mirror')[0].split('_mirror')[0].split('_MR')[0].split('.')[0].replace('.','')
 
                 for i in range(50):
                     matrix_pat=matrix_pat.split('_T'+str(i))[0]
@@ -179,7 +179,10 @@ def apply_transform_to_landmarks(scan_path, transform, output_path):
         return
 
     for point in lm_data['markups'][0]['controlPoints']:
-        point['position'] = list(tfm_inverted.TransformPoint(point['position']))
+        if point.get('positionStatus') == 'defined' and isinstance(point.get('position'), list) and len(point['position']) == 3:
+            point['position'] = list(tfm_inverted.TransformPoint(point['position']))
+        else:
+            pass
 
     with open(output_path, 'w') as f:
         json.dump(lm_data, f, indent=2)
@@ -290,6 +293,7 @@ def main(args):
                 # For landmarks
                 if is_landmark:
                     out_file = outpath.split(".mrk.json")[0] + out_suffix + ".mrk.json"
+                    logger.info(f"working on file {scan}")
                     apply_transform_to_landmarks(scan, tfm, out_file)
                     continue
 
