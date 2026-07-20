@@ -84,29 +84,28 @@ def butterflyPatch(surf,
     except ToothNoExist as error:
         logger.error(f' Error {error}')
         return
+    
+    ratio_anterior_left /= 2
+    ratio_anterior_right /= 2
+    ratio_posterior_left /= 2
+    ratio_posterior_right /= 2
+
     V = torch.tensor(vtk_to_numpy(surf_tmp.GetPoints().GetData())).to(torch.float32)
     F = torch.tensor(vtk_to_numpy(surf_tmp.GetPolys().GetData()).reshape(-1, 4)[:,1:]).to(torch.int64)
 
-    centroid_anterior_right = centroid[str(tooth_anterior_right)] + np.array([0,adjust_anterior_right,0],dtype=np.float32)
-    centroid_anterior_left = centroid[str(tooth_anterior_left)] + np.array([0,adjust_anterior_left,0],dtype=np.float32)
+    c_ar = centroid[str(tooth_anterior_right)] + np.array([0, adjust_anterior_right, 0], dtype=np.float32)
+    c_al = centroid[str(tooth_anterior_left)] + np.array([0, adjust_anterior_left, 0], dtype=np.float32)
+    c_pr = centroid[str(tooth_posterior_right)] + np.array([0, adjust_posterior_right, 0], dtype=np.float32)
+    c_pl = centroid[str(tooth_posterior_left)] + np.array([0, adjust_posterior_left, 0], dtype=np.float32)
 
-
-    centroid_posterior_rigth = centroid[str(tooth_posterior_right)] + np.array([0,adjust_posterior_right,0],dtype=np.float32)
-    centroid_posterior_left = centroid[str(tooth_posterior_left)]+ np.array([0,adjust_posterior_left ,0],dtype=np.float32)
-
-
-    landmark_anterior_left = (1-ratio_anterior_left) * centroid_anterior_right + ratio_anterior_left * centroid_anterior_left
-    landmark_anterior_right = (1-ratio_anterior_right) * centroid_anterior_left + ratio_anterior_right * centroid_anterior_right
-
-    landmark_posterior_left = (1-ratio_posterior_left) * centroid_posterior_rigth + ratio_posterior_left * centroid_posterior_left
-    landmark_posterior_right = (1- ratio_posterior_right) * centroid_posterior_left + ratio_posterior_right * centroid_posterior_rigth
+    landmark_anterior_right = (1 - ratio_anterior_right) * c_ar + ratio_anterior_right * c_al
+    landmark_posterior_right = (1 - ratio_posterior_right) * c_pr + ratio_posterior_right * c_pl
+    
+    landmark_anterior_left = (1 - ratio_anterior_left) * c_al + ratio_anterior_left * c_ar
+    landmark_posterior_left = (1 - ratio_posterior_left) * c_pl + ratio_posterior_left * c_pr
+    
     landmark_middle_posterior = (landmark_posterior_left + landmark_posterior_right) / 2
-
-
-
-    middle = (landmark_posterior_left + landmark_anterior_right) / 2
-
-
+    middle = (landmark_anterior_left + landmark_anterior_right + landmark_posterior_left + landmark_posterior_right) / 4
 
     #rectangle limit
     t = np.arange(0,1,0.01)
@@ -122,70 +121,28 @@ def butterflyPatch(surf,
     dis = torch.cdist(bas_seg,V[:,:2])
     arg_bas_seg = torch.unique(torch.argwhere(dis < radius).squeeze()[:,1])
 
+    def compute_bezier_patch(start, middle, end, V, radius):
+        bezier = Bezier_bled(start[:2], middle[:2], end[:2], 0.01)
+        v_dir = (end[:2] - start[:2])
+        v_norm = np.linalg.norm(v_dir)
+        v_unit = v_dir / (v_norm + 1e-6)
+        
+        v_bezier = bezier - start[:2]
+        proj = np.dot(v_bezier, v_unit)
+        bezier_proj = np.outer(proj, v_unit) + start[:2]
+        sym = 2 * bezier_proj - bezier
+        
+        dist = torch.cdist(torch.tensor(sym, dtype=torch.float32), V[:,:2])
+        return torch.argwhere(dist < radius)[:, 1]
 
-
-    
-
-
-    #bezier droite
-    bezier = Bezier_bled(landmark_posterior_right[:2],landmark_middle_posterior[:2],landmark_anterior_right[:2],0.01)
-    v_bezier = bezier - np.expand_dims(landmark_posterior_right[:2],axis=0)
-    v_norm_bezier = np.expand_dims(np.linalg.norm(v_bezier, axis=1),axis=0).T
-    
-    for i in range(len(v_norm_bezier)):
-        if v_norm_bezier[i] == 0:
-            v_norm_bezier[i] += 0.01
-
-    v_bezier = v_bezier / v_norm_bezier
-
-    v = np.expand_dims(landmark_anterior_right[:2] - landmark_posterior_right[:2], axis=0).T
-    v_norm = np.linalg.norm(v)
-    v = v / v_norm
-    P = np.matmul(v , v.T)
-
-    bezier_proj = ( P @ v_bezier.T).T *v_norm_bezier + landmark_posterior_right[:2]
-    sym = 2*bezier_proj - bezier
-
-    bezier = torch.tensor(sym,dtype=torch.float32)
-    dist = torch.cdist(bezier,V[:,:2])
-    arg_bezier = torch.argwhere(dist < radius)[:,1]
-
-
-
-
-    #bezier gauche
-    bezier2 = Bezier_bled(landmark_posterior_left[:2],landmark_middle_posterior[:2],landmark_anterior_left[:2],0.01)
-    v_bezier = bezier2 - np.expand_dims(landmark_posterior_left[:2],axis=0)
-    v_norm_bezier = np.expand_dims(np.linalg.norm(v_bezier, axis=1),axis=0).T
-    for i in range(len(v_norm_bezier)):
-        if v_norm_bezier[i] == 0:
-            v_norm_bezier[i] += 0.01
-    v_bezier = v_bezier / v_norm_bezier
-
-    v = np.expand_dims(landmark_anterior_left[:2] - landmark_posterior_left[:2], axis=0).T
-    v_norm = np.linalg.norm(v)
-    v = v / v_norm
-    P = np.matmul(v , v.T)
-
-    bezier_proj = ( P @ v_bezier.T).T *v_norm_bezier + landmark_posterior_left[:2]
-    sym = 2*bezier_proj - bezier2
-
-    bezier2 = torch.tensor(sym,dtype=torch.float32)
-    dist = torch.cdist(bezier2,V[:,:2])
-    logger.debug(f'bezier2.shape {bezier2.shape}, V[:,;2].shape {V[:,:2].shape}')
-    arg_bezier2 = torch.argwhere(dist < radius)[:,1]
-
-
-
-
+    arg_bezier_right = compute_bezier_patch(landmark_posterior_right, landmark_middle_posterior, landmark_anterior_right, V, radius)
+    arg_bezier_left = compute_bezier_patch(landmark_posterior_left, landmark_middle_posterior, landmark_anterior_left, V, radius)
 
     V_label = torch.zeros((V.shape[0]))
     V_label[arg_haut_seg] = 1
     V_label[arg_bas_seg] = 1
-    V_label[arg_bezier] = 1
-    V_label[arg_bezier2] = 1
-
-
+    V_label[arg_bezier_right] = 1
+    V_label[arg_bezier_left] = 1
 
     dist = torch.cdist(torch.tensor(middle[:2]).unsqueeze(0),V[:,:2]).squeeze()
     middle_arg = torch.argmin(dist)
