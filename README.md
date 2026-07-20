@@ -46,6 +46,8 @@ Slicer automated dental tools is an extension that allows users to perform autom
 | [BatchDentalSegmentator](#BatchDentalSeg) | DentalSegmentator in batch for mixed or permanent dentition |
 | [CLI-C](#CLI-C-module) |Classification and Localization of Impacted Canines |
 | [VFACE](#vface-module) | Visual Facial Asymmetry Classification Engine. Automated classification of facial asymmetry. |
+| [GreedyReg](#greedyreg-module) | ITK-SNAP style registration of CBCT scans using the Greedy engine (manual, automatic and distant modes, single or batch). |
+| [Agent](#agent-module) | AI assistant that runs the other modules from a natural-language request, using a local LLM. |
 
 These modules provide a convenient user interface, are available through the `Automated Dental Tools` module category, and share common features :
 
@@ -85,6 +87,8 @@ Additionally, the following modules are implemented as python scripted command-l
 | [BatchDentalSegmentator](BATCHDENTALSEG) | DentalSegmentator in batch for mixed or permanent dentition |
 | [CLI-C](CLIC) |Classification and Localization of Impacted Canines |
 | [VFACE_CLI](VFACE_CLI) | Classify automatically facial asymmetry based on linear and angluar measurements |
+| [GreedyReg_CLI](GreedyReg_CLI) | Run Greedy-based registration of CBCT scans |
+| [Agent_CLI](Agent_CLI) | Route a natural-language request to the right tool, extract its parameters and build the command to run |
 
 
 ## Requirements
@@ -871,6 +875,49 @@ The module checks and automatically installs these dependencies upon first usage
 The module provides an intuitive interface for facial asymmetry classification. Simply load your facial data, select the appropriate models and parameters, and run the analysis to obtain automated classification results and measurements.
 
 For detailed usage instructions and tutorials, please refer to the module's built-in help documentation.
+
+## GreedyReg Module
+
+<img src="GreedyReg/Resources/Icons/GreedyReg.png" alt="Extension Logo" width="70"/>
+
+**GreedyReg** performs ITK-SNAP style registration of CBCT scans using the [Greedy](https://greedy.readthedocs.io/) registration engine. It combines manual approximation tools with automatic registration, and can process a single pair of scans or a whole folder in batch.
+
+### Prerequisites
+
+* The Greedy binary is required. If it is not found, the module shows a **Download Greedy** button that installs it automatically (~60MB).
+* The **Distant Registration** mode additionally relies on the ALI-CBCT Python libraries. If they are missing, the module offers to install them.
+
+### How does the module work?
+
+1. **Input Volumes:** select the fixed (T1) and moving (T2) CBCT scans to register.
+2. **Create Mask** *(optional):* paint a region to focus the registration on a specific area.
+3. **Manual Alignment:** roughly pre-align the moving scan using rotation/translation sliders and the manual approximation tools.
+4. **Automatic Registration:** run the Greedy registration, save the registered volume, or use **Run Batch Registration** to process an entire folder of scans.
+5. **Distant Registration (Large Misalignment):** when the two scans start far apart, this mode uses ALI-CBCT landmarks to first bring them close together before registering. It is also available in batch.
+
+## Agent Module
+
+<img src="Agent/Resources/Icons/Agent.png" alt="Extension Logo" width="70"/>
+
+The **Agent** module is the graphical front-end of the AI Agent extension. Instead of opening each module by hand, you describe what you want to do with your dental/orthodontic imaging data in **natural language**, and the agent selects the right Automated Dental Tools module, extracts its parameters and runs it for you.
+
+The agent runs **fully locally**: it is powered by the `qwen3:8b` model through [Ollama](https://ollama.com/), so no data leaves your machine.
+
+### Prerequisites
+
+* [Ollama](https://ollama.com/) must be installed.
+* Click the **Check** button once to install the required Python dependencies and pull the `qwen3:8b` model. This step is only needed the first time.
+
+### How does the module work?
+
+1. **Describe your task:** Type your request in plain language (e.g. *"orient these CBCT scans"* or *"segment this folder"*).
+2. **Add your data:** Drag & drop one or more files or folders into the drop zone.
+3. **Choose a mode:**
+   - **Agent (Automated):** the agent picks the matching tool, fills in its parameters and runs it automatically.
+   - **Consultant:** the agent recommends the most appropriate tool(s) for your request without running them.
+4. **Run:** the agent routes your request to the corresponding module. If a tool execution fails, the agent automatically tries to fix the parameters from the error and retries (up to a few attempts).
+
+The routing, parameter extraction and command building are handled by the internal [Agent_CLI](Agent_CLI) module.
 
 
 

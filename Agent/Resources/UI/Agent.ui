@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Agent</class>
+ <widget class="qMRMLWidget" name="Agent">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>420</width>
+    <height>1313</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">qMRMLWidget {
+  background-color: palette(window);
+}
+ctkCollapsibleButton {
+  background-color: palette(base);
+  border: 1px solid palette(mid);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  padding: 6px 10px;
+}
+ctkCollapsibleButton:hover {
+  border: 1px solid #3498db;
+  background-color: palette(alternate-base);
+}
+QLineEdit, QTextEdit {
+  background-color: palette(base);
+  color: palette(text);
+  border: 1px solid palette(mid);
+  border-radius: 4px;
+  padding: 6px;
+  selection-background-color: palette(highlight);
+}
+QLineEdit:focus, QTextEdit:focus {
+  border: 2px solid #3498db;
+}
+QComboBox {
+  background-color: palette(base);
+  color: palette(text);
+  border: 1px solid palette(mid);
+  border-radius: 4px;
+  padding: 4px 6px;
+}
+QComboBox:focus {
+  border: 2px solid #3498db;
+}
+QComboBox::drop-down {
+  width: 20px;
+  border: none;
+}
+QLabel {
+  color: palette(window-text);
+  font-weight: 500;
+}
+  </string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>8</number>
+   </property>
+   <property name="leftMargin">
+    <number>12</number>
+   </property>
+   <property name="topMargin">
+    <number>12</number>
+   </property>
+   <property name="rightMargin">
+    <number>12</number>
+   </property>
+   <property name="bottomMargin">
+    <number>12</number>
+   </property>
+   <item>
+    <widget class="ctkCollapsibleButton" name="CollapsibleButton">
+     <property name="text">
+      <string>Dependencies</string>
+     </property>
+     <property name="collapsed">
+      <bool>false</bool>
+     </property>
+     <layout class="QFormLayout" name="formLayout_3">
+      <property name="horizontalSpacing">
+       <number>8</number>
+      </property>
+      <property name="verticalSpacing">
+       <number>8</number>
+      </property>
+      <property name="leftMargin">
+       <number>4</number>
+      </property>
+      <property name="topMargin">
+       <number>4</number>
+      </property>
+      <property name="rightMargin">
+       <number>4</number>
+      </property>
+      <property name="bottomMargin">
+       <number>4</number>
+      </property>
+       <item row="0" column="0" colspan="2">
+        <widget class="QPushButton" name="CheckButton">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="toolTip">
+      <string>Click to check and install the dependencies</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
+  background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #4ba3ff, stop:1 #3498db);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 10pt;
+  padding: 8px;
+  margin-top: 4px;
+}
+QPushButton:hover:!pressed {
+  background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #5cb3ff, stop:1 #2980b9);
+}
+QPushButton:pressed {
+  background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #2980b9, stop:1 #1f618d);
+}
+QPushButton:disabled {
+  background-color: #bdc3c7;
+  color: #95a5a6;
+}
+      </string>
+     </property>
+     <property name="text">
+      <string>Check and install dependencies</string>
+     </property>
+    </widget>
+       </item>
+      </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="ctkCollapsibleButton" name="inputsCollapsibleButton">
+     <property name="text">
+      <string>Inputs</string>
+     </property>
+     <property name="collapsed">
+      <bool>false</bool>
+     </property>
+     <layout class="QFormLayout" name="formLayout_2">
+      <property name="horizontalSpacing">
+       <number>8</number>
+      </property>
+      <property name="verticalSpacing">
+       <number>8</number>
+      </property>
+      <property name="leftMargin">
+       <number>4</number>
+      </property>
+      <property name="topMargin">
+       <number>4</number>
+      </property>
+      <property name="rightMargin">
+       <number>4</number>
+      </property>
+      <property name="bottomMargin">
+       <number>4</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="modeLabel">
+        <property name="styleSheet">
+         <string notr="true">color: palette(window-text); font-weight: 600;</string>
+        </property>
+        <property name="text">
+         <string>Mode</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="comboBox">
+        <item>
+         <property name="text">
+          <string>Agent (Automated)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Ask (Interactive)</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label">
+        <property name="styleSheet">
+         <string notr="true">color: palette(window-text); font-weight: 600;</string>
+        </property>
+        <property name="text">
+         <string>Prompt</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QTextEdit" name="textEdit_2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>26</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>130</height>
+         </size>
+        </property>
+        <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarAsNeeded</enum>
+        </property>
+        <property name="placeholderText">
+         <string>Describe your task...</string>
+        </property>
+        <property name="SlicerParameterName" stdset="0">
+         <string>prompt</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="applyButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="toolTip">
+      <string>Run the algorithm with the specified parameters.</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
+  background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #4ba3ff, stop:1 #3498db);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 10pt;
+  padding: 8px;
+  margin-top: 4px;
+}
+QPushButton:hover:!pressed {
+  background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #5cb3ff, stop:1 #2980b9);
+}
+QPushButton:pressed {
+  background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #2980b9, stop:1 #1f618d);
+}
+QPushButton:disabled {
+  background-color: #bdc3c7;
+  color: #95a5a6;
+}
+      </string>
+     </property>
+     <property name="text">
+      <string>▶ Apply</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_4">
+     <property name="styleSheet">
+      <string notr="true">color: palette(window-text); font-weight: 600;</string>
+     </property>
+     <property name="text">
+      <string>LLM is thinking...</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTextEdit" name="textEdit">
+     <property name="cursor" stdset="0">
+      <cursorShape>ArrowCursor</cursorShape>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">
+QTextEdit {
+  background-color: palette(base);
+  color: palette(mid);
+  border: 1px solid palette(mid);
+  border-radius: 4px;
+  padding: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 9pt;
+  selection-background-color: palette(highlight);
+}
+    </string>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::NoTextInteraction</set>
+     </property>
+     <property name="placeholderText">
+      <string>LLM response will appear here...</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="buttonsLayout">
+     <property name="spacing">
+      <number>8</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="ClearButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>Clear the chat with the model</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+  background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #4ba3ff, stop:1 #3498db);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 10pt;
+  padding: 8px;
+  margin-top: 4px;
+}
+QPushButton:hover:!pressed {
+  background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #5cb3ff, stop:1 #2980b9);
+}
+QPushButton:pressed {
+  background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #2980b9, stop:1 #1f618d);
+}
+QPushButton:disabled {
+  background-color: #bdc3c7;
+  color: #95a5a6;
+}
+        </string>
+       </property>
+       <property name="text">
+        <string>Clear Chat</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="RetrieveButton">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="toolTip">
+        <string>Retrieve and use a previous chat with the model</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+  background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #4ba3ff, stop:1 #3498db);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 10pt;
+  padding: 8px;
+  margin-top: 4px;
+}
+QPushButton:hover:!pressed {
+  background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #5cb3ff, stop:1 #2980b9);
+}
+QPushButton:pressed {
+  background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #2980b9, stop:1 #1f618d);
+}
+QPushButton:disabled {
+  background-color: #bdc3c7;
+  color: #95a5a6;
+}
+        </string>
+       </property>
+       <property name="text">
+        <string>Previous Chat</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="SaveButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>Save the chat with the model</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+  background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #4ba3ff, stop:1 #3498db);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 10pt;
+  padding: 8px;
+  margin-top: 4px;
+}
+QPushButton:hover:!pressed {
+  background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #5cb3ff, stop:1 #2980b9);
+}
+QPushButton:pressed {
+  background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #2980b9, stop:1 #1f618d);
+}
+QPushButton:disabled {
+  background-color: #bdc3c7;
+  color: #95a5a6;
+}
+        </string>
+       </property>
+       <property name="text">
+        <string>Save Chat</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QPushButton" name="RunButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="visible">
+      <bool>false</bool>
+     </property>
+     <property name="toolTip">
+      <string>Run the module choose by the agent</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
+  background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #4ba3ff, stop:1 #3498db);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 10pt;
+  padding: 8px;
+  margin-top: 4px;
+}
+QPushButton:hover:!pressed {
+  background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #5cb3ff, stop:1 #2980b9);
+}
+QPushButton:pressed {
+  background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #2980b9, stop:1 #1f618d);
+}
+QPushButton:disabled {
+  background-color: #bdc3c7;
+  color: #95a5a6;
+}
+        </string>
+     </property>
+     <property name="text">
+      <string>Run module</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ctkCollapsibleButton</class>
+   <extends>QWidget</extends>
+   <header>ctkCollapsibleButton.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>qMRMLWidget</class>
+   <extends>QWidget</extends>
+   <header>qMRMLWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

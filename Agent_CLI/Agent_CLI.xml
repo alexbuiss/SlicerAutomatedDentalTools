@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+  <title>Agent_CLI</title>
+  <category>Automated Dental Tools.Advanced</category>
+  <description><![CDATA[Agent CLI Router]]></description>
+  <version>0.1.0</version>
+  <contributor>Alexandre Buisson (UNC)</contributor>
+
+  <parameters>
+    <label>Inputs</label>
+    <description><![CDATA[Input/output parameters]]></description>
+
+    <string>
+      <name>prompt</name>
+      <label>Prompt</label>
+      <index>0</index>
+      <description><![CDATA[What you want]]></description>
+      <default>I need nothing</default>
+    </string>
+
+    <string-vector>
+      <name>folders</name>
+      <label>Folders</label>
+      <index>1</index>
+      <description><![CDATA[List of folders containing paths needed for the CLIs (e.g., output, T1, T2).]]></description>
+    </string-vector>
+
+    <string>
+      <name>modeagent</name>
+      <label>ModeAgent</label>
+      <index>2</index>
+      <description><![CDATA[Agent (Automated) or Consultant]]></description>
+    </string>
+
+    <string>
+      <name>temp_folder</name>
+      <label>TempFolder</label>
+      <index>3</index>
+      <description><![CDATA[Agent (Automated) or Consultant]]></description>
+    </string>
+
+    <string>
+      <name>history</name>
+      <label>History</label>
+      <index>4</index>
+      <description><![CDATA[JSON-encoded list of {"role","content"} messages from earlier turns in this conversation, so the model isn't limited to the latest message.]]></description>
+      <default>[]</default>
+    </string>
+
+  </parameters>
+</executable>
