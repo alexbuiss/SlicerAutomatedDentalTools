@@ -69,17 +69,17 @@ def main(args):
             tooth_posterior_right=args.lineedit_teeth_right_bot,
             tooth_posterior_left=args.lineedit_teeth_left_bot,
             
-            ratio_anterior_right=(1 - args.lineedit_ratio_right_top),
-            ratio_anterior_left=(1 - args.lineedit_ratio_left_top),
+            ratio_anterior_right=args.lineedit_ratio_right_top,
+            ratio_anterior_left=args.lineedit_ratio_left_top,
             
-            ratio_posterior_left=(1 - args.lineedit_ratio_left_bot),
-            ratio_posterior_right=(1 - args.lineedit_ratio_right_bot),
+            ratio_posterior_left=args.lineedit_ratio_left_bot,
+            ratio_posterior_right=args.lineedit_ratio_right_bot,
             
             adjust_anterior_right=args.lineedit_adjust_right_top, 
             adjust_anterior_left=args.lineedit_adjust_left_top,
             
-            adjust_posterior_right=-args.lineedit_adjust_right_bot,
-            adjust_posterior_left=-args.lineedit_adjust_left_bot,
+            adjust_posterior_right=args.lineedit_adjust_right_bot,
+            adjust_posterior_left=args.lineedit_adjust_left_bot,
             
             index=args.index_patch
         )
