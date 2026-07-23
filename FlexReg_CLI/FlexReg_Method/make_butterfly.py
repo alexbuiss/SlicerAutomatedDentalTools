@@ -85,18 +85,18 @@ def butterflyPatch(surf,
         logger.error(f' Error {error}')
         return
     
-    ratio_anterior_left /= 2
-    ratio_anterior_right /= 2
-    ratio_posterior_left /= 2
-    ratio_posterior_right /= 2
+    ratio_anterior_left = (1 - ratio_anterior_left)/2
+    ratio_anterior_right = (1 - ratio_anterior_right)/2
+    ratio_posterior_left = (1 - ratio_posterior_left)/2
+    ratio_posterior_right = (1 - ratio_posterior_right)/2
 
     V = torch.tensor(vtk_to_numpy(surf_tmp.GetPoints().GetData())).to(torch.float32)
     F = torch.tensor(vtk_to_numpy(surf_tmp.GetPolys().GetData()).reshape(-1, 4)[:,1:]).to(torch.int64)
 
     c_ar = centroid[str(tooth_anterior_right)] + np.array([0, adjust_anterior_right, 0], dtype=np.float32)
     c_al = centroid[str(tooth_anterior_left)] + np.array([0, adjust_anterior_left, 0], dtype=np.float32)
-    c_pr = centroid[str(tooth_posterior_right)] + np.array([0, adjust_posterior_right, 0], dtype=np.float32)
-    c_pl = centroid[str(tooth_posterior_left)] + np.array([0, adjust_posterior_left, 0], dtype=np.float32)
+    c_pr = centroid[str(tooth_posterior_right)] + np.array([0, - adjust_posterior_right, 0], dtype=np.float32)
+    c_pl = centroid[str(tooth_posterior_left)] + np.array([0, -adjust_posterior_left, 0], dtype=np.float32)
 
     landmark_anterior_right = (1 - ratio_anterior_right) * c_ar + ratio_anterior_right * c_al
     landmark_posterior_right = (1 - ratio_posterior_right) * c_pr + ratio_posterior_right * c_pl

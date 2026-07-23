@@ -60,6 +60,7 @@ def main(args):
                 f"LB={args.lineedit_adjust_left_bot}, RB={args.lineedit_adjust_right_bot} | "
                 f"Index: {args.index_patch}"
             )
+        
         butterflyPatch(
             surf=modelNode,
             tooth_anterior_right=args.lineedit_teeth_right_top,
@@ -74,7 +75,7 @@ def main(args):
             ratio_posterior_left=args.lineedit_ratio_left_bot,
             ratio_posterior_right=args.lineedit_ratio_right_bot,
             
-            adjust_anterior_right=args.lineedit_adjust_right_top,
+            adjust_anterior_right=args.lineedit_adjust_right_top, 
             adjust_anterior_left=args.lineedit_adjust_left_top,
             
             adjust_posterior_right=args.lineedit_adjust_right_bot,
