@@ -1368,19 +1368,19 @@ class WidgetParameter:
 
         (self.lineedit_teeth_left_top , 
          self.lineedit_ratio_left_top ,
-            self.lineedit_adjust_left_top) = self.displayParamater(self.layout_left_top,1,[5,0.3,0])
+            self.lineedit_adjust_left_top) = self.displayParamater(self.layout_left_top,1,[5,0.655,-0.1])
         
         (self.lineedit_teeth_right_top , 
          self.lineedit_ratio_right_top ,
-            self.lineedit_adjust_right_top) = self.displayParamater(self.layout_right_top,2,[12,0.3,0])
+            self.lineedit_adjust_right_top) = self.displayParamater(self.layout_right_top,2,[12,0.655,-0.1])
         
         (self.lineedit_teeth_left_bot , 
          self.lineedit_ratio_left_bot ,
-            self.lineedit_adjust_left_bot) = self.displayParamater(self.layout_left_bot,3,[3,0.33,0])
+            self.lineedit_adjust_left_bot) = self.displayParamater(self.layout_left_bot,3,[3,0.68,2])
 
         (self.lineedit_teeth_right_bot , 
          self.lineedit_ratio_right_bot ,
-            self.lineedit_adjust_right_bot) = self.displayParamater(self.layout_right_bot,4,[14,0.33,0])
+            self.lineedit_adjust_right_bot) = self.displayParamater(self.layout_right_bot,4,[14,0.68,2])
         
        
         self.button_update = QPushButton('Update')
