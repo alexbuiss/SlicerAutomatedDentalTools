@@ -103,6 +103,12 @@ def chat_with_auto_pull(model: str, messages: List[Dict[str, str]], **kwargs):
     """
     import ollama
 
+    # Keep the model resident in (V)RAM for 30 min between calls instead of the
+    # default 5 min. Reloading an 8B model into the GPU costs a few seconds, so
+    # a longer keep_alive avoids that penalty when the user pauses between chat
+    # messages. Callers can still override via kwargs.
+    kwargs.setdefault("keep_alive", "30m")
+
     try:
         return ollama.chat(model=model, messages=messages, **kwargs)
     except Exception as e:
