@@ -18,6 +18,195 @@ MAX_REPAIR_ATTEMPTS = 2
 MODEL_NAME = "qwen3:8b"
 
 
+# ---------------------------------------------------------------------------
+# Ollama auto-installation
+#
+# Most end users of this extension are clinicians/researchers who are not
+# comfortable installing command-line software. When Ollama is missing we can
+# download the *official* build (which detects and uses the GPU) into a
+# user-writable folder - no admin/sudo, no terminal - and launch its server.
+#
+# We deliberately avoid the Linux "curl | sudo sh" installer and the Ubuntu
+# snap package: the former needs a root password we can't supply from the GUI,
+# the latter is sandboxed and cannot reach the GPU (falls back to CPU, ~80-90s
+# per answer). The portable archives below ship the CUDA/Metal libraries and
+# run entirely from a user folder.
+# ---------------------------------------------------------------------------
+
+def _agent_install_dir():
+    """User-writable folder where we keep our bundled Ollama."""
+    base = os.environ.get("SLICER_AGENT_HOME") or os.path.join(
+        os.path.expanduser("~"), ".slicer_agent")
+    return os.path.join(base, "ollama")
+
+
+def _bundled_ollama_binary():
+    """Path to an Ollama binary we installed previously, or None."""
+    d = _agent_install_dir()
+    for c in (
+        os.path.join(d, "bin", "ollama"),                                   # Linux .tgz
+        os.path.join(d, "ollama.exe"),                                      # Windows .zip
+        os.path.join(d, "Ollama.app", "Contents", "Resources", "ollama"),  # macOS .app
+    ):
+        if os.path.exists(c):
+            return c
+    return None
+
+
+def _ollama_env(binary):
+    """Environment for running our bundled Ollama (so it finds its own libs)."""
+    env = dict(os.environ)
+    libdir = os.path.join(_agent_install_dir(), "lib", "ollama")  # Linux layout
+    if os.path.isdir(libdir):
+        env["LD_LIBRARY_PATH"] = libdir + os.pathsep + env.get("LD_LIBRARY_PATH", "")
+    return env
+
+
+def _ollama_responding(timeout=0.5):
+    """True if an Ollama server answers on the default port (127.0.0.1:11434)."""
+    import socket
+    s = socket.socket()
+    s.settimeout(timeout)
+    try:
+        s.connect(("127.0.0.1", 11434))
+        return True
+    except Exception:
+        return False
+    finally:
+        s.close()
+
+
+def _download_with_progress(url, dest, title):
+    """Download url -> dest showing a modal Qt progress dialog. Raises on cancel."""
+    import urllib.request
+    progress = qt.QProgressDialog(title, "Cancel", 0, 100)
+    progress.setWindowModality(qt.Qt.WindowModal)
+    progress.setMinimumDuration(0)
+    progress.setValue(0)
+    slicer.app.processEvents()
+
+    def hook(count, block_size, total_size):
+        if total_size > 0:
+            progress.setValue(min(100, int(count * block_size * 100 / total_size)))
+        slicer.app.processEvents()
+        if progress.wasCanceled():
+            raise RuntimeError("Download cancelled by the user")
+
+    try:
+        urllib.request.urlretrieve(url, dest, hook)
+    finally:
+        progress.close()
+
+
+def install_official_ollama():
+    """Download the official (GPU-enabled) Ollama into a user folder.
+
+    Returns the path to the ollama binary. Raises on any failure so the caller
+    can fall back to the manual-install message.
+    """
+    import platform
+    import tarfile
+    import zipfile
+    import tempfile
+    import subprocess
+
+    system = platform.system()
+    machine = platform.machine().lower()
+    install_dir = _agent_install_dir()
+    os.makedirs(install_dir, exist_ok=True)
+    tmpdir = tempfile.mkdtemp()
+
+    if system == "Linux":
+        arch = "arm64" if machine in ("aarch64", "arm64") else "amd64"
+        url = f"https://ollama.com/download/ollama-linux-{arch}.tgz"
+        archive = os.path.join(tmpdir, "ollama.tgz")
+        _download_with_progress(url, archive, "Downloading Ollama (GPU build)…")
+        with tarfile.open(archive) as tf:
+            tf.extractall(install_dir)
+        binary = os.path.join(install_dir, "bin", "ollama")
+        os.chmod(binary, 0o755)
+
+    elif system == "Windows":
+        arch = "arm64" if "arm" in machine else "amd64"
+        url = f"https://ollama.com/download/ollama-windows-{arch}.zip"
+        archive = os.path.join(tmpdir, "ollama.zip")
+        _download_with_progress(url, archive, "Downloading Ollama (GPU build)…")
+        with zipfile.ZipFile(archive) as zf:
+            zf.extractall(install_dir)
+        binary = os.path.join(install_dir, "ollama.exe")
+
+    elif system == "Darwin":
+        url = "https://ollama.com/download/Ollama-darwin.zip"
+        archive = os.path.join(tmpdir, "ollama.zip")
+        _download_with_progress(url, archive, "Downloading Ollama…")
+        # Use ditto so the .app bundle's symlinks and exec bits survive.
+        subprocess.run(["ditto", "-x", "-k", archive, install_dir], check=True)
+        binary = os.path.join(install_dir, "Ollama.app", "Contents", "Resources", "ollama")
+        # Strip the Gatekeeper quarantine flag so it launches without a prompt.
+        subprocess.run(
+            ["xattr", "-dr", "com.apple.quarantine",
+             os.path.join(install_dir, "Ollama.app")],
+            check=False,
+        )
+        os.chmod(binary, 0o755)
+
+    else:
+        raise RuntimeError(f"Unsupported operating system: {system}")
+
+    if not os.path.exists(binary):
+        raise RuntimeError("Ollama download finished but the binary was not found.")
+    return binary
+
+
+def ensure_ollama_server(binary):
+    """Make sure an Ollama server is reachable, starting our bundled one if needed.
+
+    Returns True once the server answers, False on timeout.
+    """
+    import platform
+    import subprocess
+
+    if _ollama_responding():
+        return True
+
+    creationflags = 0
+    if platform.system() == "Windows":
+        creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+
+    subprocess.Popen(
+        [binary, "serve"],
+        env=_ollama_env(binary),
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        creationflags=creationflags,
+    )
+
+    # Give the server up to ~30s to come up, keeping the UI responsive.
+    for _ in range(60):
+        if _ollama_responding():
+            return True
+        slicer.app.processEvents()
+        qt.QThread.msleep(500)
+    return _ollama_responding()
+
+
+def ensure_agent_ollama_running():
+    """Best-effort: make sure an Ollama server is up before talking to it.
+
+    Cheap when the server is already running (a single socket probe). If it is
+    down but we have a system or previously-bundled Ollama, start it. Used both
+    at dependency-check time and before each conversation, since a server we
+    launched ourselves does not survive a Slicer restart.
+    """
+    import shutil
+    if _ollama_responding():
+        return True
+    binary = shutil.which("ollama") or _bundled_ollama_binary()
+    if binary is None:
+        return False
+    return ensure_ollama_server(binary)
+
+
 class DropZone(qt.QFrame):
     """Drag & drop area for multiple files/folders. Emits a list of local paths."""
     dropped = qt.Signal(list)
@@ -578,6 +767,10 @@ class AgentWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.label_4.setVisible(True)
         slicer.app.processEvents()
 
+        # A server we auto-installed does not survive a Slicer restart, so make
+        # sure one is running before we hand the request to Agent_CLI.
+        ensure_agent_ollama_running()
+
         # Snapshot history BEFORE adding this turn's user message, since
         # Agent_CLI.py appends the current prompt itself - including it here
         # too would duplicate the last user turn.
@@ -992,14 +1185,76 @@ class AgentWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         # pip_install("ollama") only installs the Python client library - the
         # actual Ollama application/server (the "ollama" binary used below)
         # has to be installed separately and isn't something pip can provide.
-        if shutil.which("ollama") is None:
-            qt.QMessageBox.warning(
+        # Prefer a system install, otherwise fall back to one we bundled before.
+        ollama_path = shutil.which("ollama") or _bundled_ollama_binary()
+
+        # Nothing installed at all: offer to download the official GPU build for
+        # the user (most of them are not comfortable doing this by hand).
+        if ollama_path is None:
+            choice = qt.QMessageBox.question(
                 None,
                 "Ollama is not installed",
-                "The Ollama Python package was installed, but the Ollama application itself "
-                "(the 'ollama' command) was not found on this machine.\n\n"
-                "Install it from https://ollama.com, make sure it's running (it should start "
-                "automatically, or run 'ollama serve' in a terminal), then click Check again."
+                "The agent needs Ollama to run the AI model, and it is not installed on "
+                "this computer.\n\n"
+                "Download and install it automatically now? This fetches the official "
+                "build (a few hundred MB, GPU-enabled) - no admin rights needed.",
+                qt.QMessageBox.Yes | qt.QMessageBox.No,
+                qt.QMessageBox.Yes,
+            )
+            if choice != qt.QMessageBox.Yes:
+                qt.QMessageBox.information(
+                    None,
+                    "Manual installation",
+                    "No problem. You can install Ollama yourself from https://ollama.com "
+                    "(on Linux, use the official installer, NOT the snap/apt package, so it "
+                    "can use your GPU), then click Check again."
+                )
+                return
+            try:
+                ollama_path = install_official_ollama()
+            except Exception as e:
+                print(f"Automatic Ollama install failed: {e}")
+                qt.QMessageBox.warning(
+                    None,
+                    "Automatic installation failed",
+                    "Ollama could not be installed automatically:\n\n"
+                    f"{e}\n\n"
+                    "Please install it manually from https://ollama.com, then click Check again."
+                )
+                return
+
+        # On Linux the snap build of Ollama runs inside a confined sandbox that
+        # cannot reach the NVIDIA GPU, so it silently falls back to CPU - a 8B
+        # model then takes ~80-90s per answer instead of a few seconds. We can't
+        # safely auto-fix this (the snap server already holds port 11434 and
+        # removing it needs sudo), so warn and point to the official build.
+        elif "/snap/" in os.path.realpath(ollama_path):
+            proceed = qt.QMessageBox.warning(
+                None,
+                "Ollama installed via snap (CPU-only)",
+                "Ollama was installed through snap. The snap build is sandboxed and "
+                "cannot use your GPU, so the agent will run on CPU and be very slow "
+                "(around 80-90 seconds per answer for the 8B model).\n\n"
+                "To get GPU speed, install the official build instead:\n\n"
+                "    sudo snap remove ollama\n"
+                "    curl -fsSL https://ollama.com/install.sh | sh\n\n"
+                "Then run 'ollama serve' and click Check again.\n\n"
+                "Continue anyway with the current (CPU-only) install?",
+                qt.QMessageBox.Yes | qt.QMessageBox.No,
+                qt.QMessageBox.No,
+            )
+            if proceed != qt.QMessageBox.Yes:
+                return
+
+        # Make sure a server is actually reachable. For a system install this is
+        # usually already running; for one we just downloaded, start it.
+        ollama_env = _ollama_env(ollama_path)
+        if not ensure_ollama_server(ollama_path):
+            qt.QMessageBox.warning(
+                None,
+                "Ollama server not responding",
+                "Ollama is installed but its server did not start. Try running "
+                "'ollama serve' in a terminal, then click Check again."
             )
             return
 
@@ -1009,9 +1264,10 @@ class AgentWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         for model in list_model:
             try:
                 result = subprocess.run(
-                    ['ollama', 'pull', model],
+                    [ollama_path, 'pull', model],
                     capture_output=True,
-                    text=True
+                    text=True,
+                    env=ollama_env,
                 )
                 if result.returncode == 0:
                     print(f"Model {model} has successfully been installed")
