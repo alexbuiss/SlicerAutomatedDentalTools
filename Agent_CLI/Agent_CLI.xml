@@ -18,12 +18,12 @@
       <default>I need nothing</default>
     </string>
 
-    <string-vector>
+    <string>
       <name>folders</name>
       <label>Folders</label>
       <index>1</index>
-      <description><![CDATA[List of folders containing paths needed for the CLIs (e.g., output, T1, T2).]]></description>
-    </string-vector>
+      <description><![CDATA[Comma-separated list of folders containing paths needed for the CLIs (e.g., output, T1, T2).]]></description>
+    </string>
 
     <string>
       <name>modeagent</name>

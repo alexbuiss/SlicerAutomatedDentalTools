@@ -589,10 +589,12 @@ class AgentWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.droppedInputPaths = self.normalize_folders(self.droppedInputPaths)
 
         if not self.droppedInputPaths:
-            self.droppedInputPaths.append(['nothing'])
+            self.droppedInputPaths.append('nothing')
 
         cliParams = {
-            "folders": self.droppedInputPaths,
+            # Agent_CLI declares `folders` as a plain string parameter and
+            # splits it on "," - pass a comma-separated string, not a list.
+            "folders": ",".join(self.droppedInputPaths),
             "prompt": self._parameterNode.prompt,
             "modeagent": self._parameterNode.modeagent,
             "temp_folder":slicer.util.tempDirectory(),
